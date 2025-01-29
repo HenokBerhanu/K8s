@@ -64,18 +64,37 @@ Vagrant.configure("2") do |config|
     node.vm.provision "file", source: "./ubuntu/vimrc", destination: "$HOME/.vimrc"
   end
 
-  # Provision Worker Nodes
-  (1..NUM_WORKER_NODE).each do |i|
-    config.vm.define "nrntn#{i}" do |node|
+  # Provision Worker Nodes with custom names
+  WORKER_NODE_NAMES = ["CloudNode", "EdgeNode"] # Replace with your desired names
+
+  WORKER_NODE_NAMES.each_with_index do |name, index|
+    config.vm.define name do |node|
       node.vm.provider "virtualbox" do |vb|
-        vb.name = "nrntn#{i}"
+        vb.name = name
         vb.memory = 32768 #1024 16384
         vb.cpus = 6 #4
       end
-      node.vm.hostname = "nrntn#{i}"
-      node.vm.network :private_network, ip: IP_NW + "#{NODE_IP_START + i}"
-      node.vm.network "forwarded_port", guest: 22, host: "#{2720 + i}"
+      node.vm.hostname = name
+      node.vm.network :private_network, ip: IP_NW + "#{NODE_IP_START + index + 1}"
+      node.vm.network "forwarded_port", guest: 22, host: "#{2720 + index + 1}"
       provision_kubernetes_node node
     end
   end
 end
+
+
+#   # Provision Worker Nodes
+#   (1..NUM_WORKER_NODE).each do |i|
+#     config.vm.define "nrntn#{i}" do |node|
+#       node.vm.provider "virtualbox" do |vb|
+#         vb.name = "nrntn#{i}"
+#         vb.memory = 32768 #1024 16384
+#         vb.cpus = 6 #4
+#       end
+#       node.vm.hostname = "nrntn#{i}"
+#       node.vm.network :private_network, ip: IP_NW + "#{NODE_IP_START + i}"
+#       node.vm.network "forwarded_port", guest: 22, host: "#{2720 + i}"
+#       provision_kubernetes_node node
+#     end
+#   end
+# end
