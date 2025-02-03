@@ -9,10 +9,10 @@ NC='\033[0m'
 
 # IP addresses
 INTERNAL_IP=$(ip addr show enp0s8 | grep "inet " | awk '{print $2}' | cut -d / -f 1)
-MASTER_1=$(dig +short master-1)
+MASTER_1=$(dig +short kmaster)
 MASTER_2=$(dig +short master-2)
-WORKER_1=$(dig +short worker-1)
-WORKER_2=$(dig +short worker-2)
+WORKER_1=$(dig +short CloudNode)
+WORKER_2=$(dig +short EdgeNode)
 LOADBALANCER=$(dig +short loadbalancer)
 LOCALHOST="127.0.0.1"
 

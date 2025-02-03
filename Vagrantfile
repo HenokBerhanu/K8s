@@ -21,10 +21,14 @@ end
 
 # Runs provisioning steps that are required by masters and workers
 def provision_kubernetes_node(node)
-  # Set up DNS
-  setup_dns node
+  # Set up kernel parameters, modules and tunables
+  node.vm.provision "setup-kernel", :type => "shell", :path => "ubuntu/setup-kernel.sh"
   # Set up ssh
   node.vm.provision "setup-ssh", :type => "shell", :path => "ubuntu/ssh.sh"
+  # Set up DNS
+  setup_dns node
+  # Install cert verification script
+  node.vm.provision "shell", inline: "ln -s /ubuntu/cert_verify.sh /home/vagrant/cert_verify.sh"
 end
 
 # All Vagrant configuration is done below. The "2" in Vagrant.configure
@@ -52,16 +56,17 @@ Vagrant.configure("2") do |config|
     # Name shown in the GUI
     node.vm.provider "virtualbox" do |vb|
       vb.name = "kmaster"
-      vb.memory = 8192
-      vb.cpus = 3 #3
+      vb.memory = 4096 #8192
+      vb.cpus = 4 #3
     end
     node.vm.hostname = "kmaster"
     node.vm.network :private_network, ip: IP_NW + "#{MASTER_IP_START}"
     node.vm.network "forwarded_port", guest: 22, host: "#{2710}"
     provision_kubernetes_node node
-    # Install (opinionated) configs for vim and tmux on master-1. These used by the author for CKA exam.
+    # Install (opinionated) configs for vim and tmux on master-node.
     node.vm.provision "file", source: "./ubuntu/tmux.conf", destination: "$HOME/.tmux.conf"
     node.vm.provision "file", source: "./ubuntu/vimrc", destination: "$HOME/.vimrc"
+    node.vm.provision "file", source: "./tools/approve-csr.sh", destination: "$HOME/approve-csr.sh"
   end
 
   # Provision Worker Nodes with custom names
@@ -71,7 +76,7 @@ Vagrant.configure("2") do |config|
     config.vm.define name do |node|
       node.vm.provider "virtualbox" do |vb|
         vb.name = name
-        vb.memory = 32768 #1024 16384
+        vb.memory = 8192 # 32768 1024 16384
         vb.cpus = 6 #4
       end
       node.vm.hostname = name
@@ -81,20 +86,3 @@ Vagrant.configure("2") do |config|
     end
   end
 end
-
-
-#   # Provision Worker Nodes
-#   (1..NUM_WORKER_NODE).each do |i|
-#     config.vm.define "nrntn#{i}" do |node|
-#       node.vm.provider "virtualbox" do |vb|
-#         vb.name = "nrntn#{i}"
-#         vb.memory = 32768 #1024 16384
-#         vb.cpus = 6 #4
-#       end
-#       node.vm.hostname = "nrntn#{i}"
-#       node.vm.network :private_network, ip: IP_NW + "#{NODE_IP_START + i}"
-#       node.vm.network "forwarded_port", guest: 22, host: "#{2720 + i}"
-#       provision_kubernetes_node node
-#     end
-#   end
-# end
