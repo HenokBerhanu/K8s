@@ -52,14 +52,14 @@ Vagrant.configure("2") do |config|
   config.vm.box_check_update = false
 
   # Provision Master Nodes
-  config.vm.define "kmaster" do |node|
+  config.vm.define "MasterNode" do |node|
     # Name shown in the GUI
     node.vm.provider "virtualbox" do |vb|
-      vb.name = "kmaster"
+      vb.name = "MasterNode"
       vb.memory = 4096 #8192
       vb.cpus = 4 #3
     end
-    node.vm.hostname = "kmaster"
+    node.vm.hostname = "MasterNode"
     node.vm.network :private_network, ip: IP_NW + "#{MASTER_IP_START}"
     node.vm.network "forwarded_port", guest: 22, host: "#{2710}"
     provision_kubernetes_node node

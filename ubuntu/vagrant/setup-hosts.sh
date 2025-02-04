@@ -23,7 +23,7 @@ sed -e "/^.*$2.*/d" -i /etc/hosts
 
 # Update /etc/hosts about other hosts
 cat >> /etc/hosts <<EOF
-${NETWORK}.102  kmaster
+${NETWORK}.102  MasterNode
 ${NETWORK}.121  CloudNode
 ${NETWORK}.122  EdgeNode
 EOF
